@@ -1,0 +1,98 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "Checkout Requests Throughput (RPS)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(checkout_requests_total[1m]))",
+          "legendFormat": "Total Requests/sec",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(checkout_success_total[1m]))",
+          "legendFormat": "Successful Requests/sec",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "title": "Payment Gateway Timeout Errors (CRITICAL)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(payment_timeout_errors_total[1m]))",
+          "legendFormat": "Timeout Errors/sec",
+          "refId": "A"
+        }
+      ],
+      "thresholds": {
+        "mode": "absolute",
+        "steps": [
+          { "color": "green", "value": null },
+          { "color": "red", "value": 0.05 }
+        ]
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "title": "Checkout Latency (P95 and P99)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(checkout_duration_ms_bucket[1m])) by (le))",
+          "legendFormat": "P95 Latency (ms)",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(checkout_duration_ms_bucket[1m])) by (le))",
+          "legendFormat": "P99 Latency (ms)",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["context-engine", "azure", "checkout-api"],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "title": "Checkout Service - Health & Telemetry",
+  "uid": "checkout-service-health",
+  "version": 1
+}
