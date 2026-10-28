@@ -72,12 +72,12 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(checkout_duration_ms_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(checkout_duration_milliseconds_bucket[1m])) by (le))",
           "legendFormat": "P95 Latency (ms)",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(checkout_duration_ms_bucket[1m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(checkout_duration_milliseconds_bucket[1m])) by (le))",
           "legendFormat": "P99 Latency (ms)",
           "refId": "B"
         }
