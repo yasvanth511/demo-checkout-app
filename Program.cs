@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using CheckoutApi.Data;
 using CheckoutApi.Telemetry;
 
@@ -23,8 +27,8 @@ else
         options.UseInMemoryDatabase("CheckoutDb"));
 }
 
-// Configure OpenTelemetry Metrics with Prometheus Exporter
-builder.Services.AddOpenTelemetry()
+var otel = builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("checkout-api", serviceVersion: "1.0.0"))
     .WithMetrics(metrics =>
     {
         metrics
@@ -32,7 +36,21 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             .AddMeter(CheckoutMetrics.MeterName)
             .AddPrometheusExporter();
-    });
+    })
+    .WithTracing(tracing =>
+    {
+        tracing
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation();
+    })
+    .WithLogging(configureBuilder: null, configureOptions: options => options.IncludeFormattedMessage = true);
+
+// Endpoint, protocol and auth come from the standard OTEL_EXPORTER_OTLP_* variables. Without an
+// endpoint the exporter would retry localhost:4317 forever, so it is only enabled when one is set.
+if (!string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]))
+{
+    otel.UseOtlpExporter();
+}
 
 var app = builder.Build();
 
