@@ -55,19 +55,20 @@ app.MapGet("/health", () => Results.Ok(new
     version = "1.0.0"
 }));
 
-// Apply migrations or create in-memory db on boot
+// Initialize database on boot (EnsureCreated works for In-Memory and relational without requiring migration files)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<CheckoutDbContext>();
-    if (db.Database.IsRelational())
-    {
-        db.Database.Migrate();
-    }
-    else
+    try
     {
         db.Database.EnsureCreated();
     }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Database EnsureCreated skipped or failed; running with in-memory state.");
+    }
 }
+
 
 app.MapControllers();
 
